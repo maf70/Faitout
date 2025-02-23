@@ -53,8 +53,10 @@ unsigned long testText() {
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
   tft.setTextColor(ILI9341_GREEN);  tft.setTextSize(4);
-  tft.println("Hello World!");
-  tft.setCursor(50, 50);
+  tft.println("   Faitout");
+  tft.setTextColor(ILI9341_BLUE);  tft.setTextSize(3);
+  tft.println(FAITOUT_VERSION);
+  tft.setCursor(110, 110);
   tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
   tft.println(micros()/1000, DEC);
   return 0;
@@ -136,8 +138,8 @@ void loop() {
     digitalWrite(TFT_BL, HIGH);
 
 #define TXT_SIZE 3
-    tft.fillRect(50, 50, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
-    tft.setCursor(50, 50);
+    tft.fillRect(110, 110, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+    tft.setCursor(110, 110);
     tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
     tft.print(x, DEC);
     tft.print(" ");
