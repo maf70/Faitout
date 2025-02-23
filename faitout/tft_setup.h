@@ -18,7 +18,7 @@
 #define TFT_DC     16
 #define TFT_RST    17
 
-#define TFT_BL    22  // LED back-light
+#define TFT_BL    4  // LED back-light
 
 #define TOUCH_CS  0
 #define TOUCH_CLK TFT_SCLK

@@ -11,7 +11,7 @@
 
 // shared with web serveur for test purpose
 uint16_t x, y;
-uint32_t t;
+uint32_t t, t_event;
 
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
@@ -54,10 +54,16 @@ unsigned long testText() {
 
 void setup(void)
 {
+  t = t_event = 0;
+
   Serial.begin(115200);
 
   tft.init();
   tft.setRotation(3);
+
+  // set the digital pin as output and switch on the LED:
+  pinMode(TFT_BL, OUTPUT);
+  digitalWrite(TFT_BL, HIGH);
 
   calibrate_touch();
   tft.setTouch(cal);
@@ -83,7 +89,11 @@ void setup(void)
  
 void loop() {
   if (tft.getTouch(&x, &y)) {
+    t_event = millis()/1000;
+
     tft.fillCircle(x, y, 2, TFT_YELLOW);
+
+    digitalWrite(TFT_BL, HIGH);
 
 #define TXT_SIZE 3
     tft.fillRect(50, 50, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
@@ -95,6 +105,8 @@ void loop() {
   }
 
   t = millis()/1000;
+
+  if ( t - t_event > 10 ) digitalWrite(TFT_BL, LOW);
 
 #ifdef CFG_WIFI_AP
   server.handleClient(); // Gérer les clients du serveur web

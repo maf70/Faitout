@@ -36,7 +36,7 @@ https://github.com/Bodmer/TFT_eSPI/tree/master
 ESP32 doc:
 https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/spi_master.html
 
-Simple server to command GPIO: 
+Simple server to command GPIO:
 https://www.electronicshub.org/esp32-web-server/
 
 ## ESP32
@@ -61,19 +61,19 @@ Missing original link of this image.
 ## Wiring
 
 
-|ILI93941|ESP32|Comment|
-|3.3     |3.3  |Rouge|
-|GND     |GND  |Noir|
-|CS      |D5   |Blanc / D5 VSPI_CS|
-|Reset   |D17  |Jaune / TX2|
-|DC      |D16  |Bleu  / RX2|
-|MOSI    |D23  |Orange / VSPI|
-|SCK     |D18  |Vert|
-|LED     |3.3  |Rouge|
-|MISO    | -   ||
-|T_CLK   |D18  |Vert|
-|T_CS    |D0   |Noir|
-|T_DIN   |D23  |Orange|
-|T_DO    |D19  |Vert clair |
-|T_IRQ   | -   ||
+|ILI93941|ESP32|Comment            |
+|3.3     |3.3  |Rouge              |
+|GND     |GND  |Noir               |
+|CS      |D5   |Blanc / D5 VSPI_CS |
+|Reset   |D17  |Jaune / TX2        |
+|DC      |D16  |Bleu  / RX2        |
+|MOSI    |D23  |Orange / VSPI      |
+|SCK     |D18  |Vert               |
+|LED     |D4   |Blanc              |
+|MISO    | -   |Not connected      |
+|T_CLK   |D18  |Vert               |
+|T_CS    |D0   |Noir               |
+|T_DIN   |D23  |Orange             |
+|T_DO    |D19  |Bleu               |
+|T_IRQ   | -   |Not connected      |
 
