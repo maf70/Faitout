@@ -1,16 +1,18 @@
 
-#include "SPI.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
- 
-#define TFT_SCK    18
-#define TFT_MOSI   23
-#define TFT_MISO   19
-#define TFT_CS     5
-#define TFT_DC     16
-#define TFT_RESET  17
- 
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RESET, TFT_MISO);
+#include "tft_setup.h"
+#include <TFT_eSPI.h>
+
+TFT_eSPI tft = TFT_eSPI();
+uint16_t cal[5] = {441, 3477, 244, 3583, 5};
+
+void calibrate_touch() {
+  if (!cal[1]) {
+    tft.fillScreen(TFT_BLACK);
+    tft.calibrateTouch(cal, TFT_YELLOW, TFT_BLACK, 20);
+    Serial.printf("cal[5] = {%d, %d, %d, %d, %d};\n",
+                  cal[0], cal[1], cal[2], cal[3], cal[4]);
+  }
+}
 
 unsigned long testText() {
   tft.setRotation(3);
@@ -26,11 +28,30 @@ unsigned long testText() {
 
 void setup(void)
 {
-  tft.begin();
+  Serial.begin(115200);
+
+  tft.init();
+  tft.setRotation(3);
+
+  calibrate_touch();
+  tft.setTouch(cal);
+
+  testText();
+
 }
  
 void loop() {
-    testText();
-    delay(5000);
-  
+  uint16_t x, y;
+  if (tft.getTouch(&x, &y)) {
+    tft.fillCircle(x, y, 2, TFT_YELLOW);
+
+#define TXT_SIZE 3
+    tft.fillRect(50, 50, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+    tft.setCursor(50, 50);
+    tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+    tft.print(x, DEC);
+    tft.print(" ");
+    tft.print(y, DEC);
   }
+
+}
