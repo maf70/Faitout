@@ -39,6 +39,9 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 Simple server to command GPIO:
 https://www.electronicshub.org/esp32-web-server/
 
+Demo of ili9341 Display + touchscreen + SD:
+https://www.youtube.com/watch?v=rq5yPJbX_uk&ab_channel=XTronical
+
 ## ESP32
 
 
@@ -64,7 +67,7 @@ Missing original link of this image.
 |ILI93941|ESP32|Comment            |
 |3.3     |3.3  |Rouge              |
 |GND     |GND  |Noir               |
-|CS      |D5   |Blanc / D5 VSPI_CS |
+|CS      |D15  |Blanc              |
 |Reset   |D17  |Jaune / TX2        |
 |DC      |D16  |Bleu  / RX2        |
 |MOSI    |D23  |Orange / VSPI      |
@@ -76,4 +79,11 @@ Missing original link of this image.
 |T_DIN   |D23  |Orange             |
 |T_DO    |D19  |Bleu               |
 |T_IRQ   | -   |Not connected      |
+|SD_CS   |D5   |Blanc              | must be used for SD according to sample ESP32_SDcard_jpeg
+|SD_MOSI |D13  |Vert clair         |
+|SD_MISO |D19  |Jaune              |
+|SD_CLK  |D18  |Violet             |
+
+
+
 

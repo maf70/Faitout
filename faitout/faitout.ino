@@ -6,8 +6,15 @@
 #include <WebServer.h>
 #endif
 
+#ifdef CFG_SD_CARD
+#include <SPI.h>
+#include "FS.h"
+#include "SD.h"
+#endif
+
 #include "tft_setup.h"
 #include <TFT_eSPI.h>
+
 
 // shared with web serveur for test purpose
 uint16_t x, y;
@@ -59,6 +66,11 @@ void setup(void)
 
   Serial.begin(115200);
 
+  // Set all chip selects high to avoid bus contention during initialisation of each peripheral
+  digitalWrite(TOUCH_CS, HIGH); // Touch controller chip select (if used)
+  digitalWrite(  TFT_CS, HIGH); // TFT screen chip select
+  digitalWrite(   SD_CS, HIGH); // SD card chips select, must use GPIO 5 (ESP32 SS)
+
   tft.init();
   tft.setRotation(3);
 
@@ -82,6 +94,33 @@ void setup(void)
   // Démarrer le serveur
   server.begin();
   Serial.println("HTTP server started");
+#endif
+
+#ifdef CFG_SD_CARD
+  if (!SD.begin(5, tft.getSPIinstance())) {
+    Serial.println("Card Mount Failed");
+    return;
+  }
+  uint8_t cardType = SD.cardType();
+
+  if (cardType == CARD_NONE) {
+    Serial.println("No SD card attached");
+    return;
+  }
+
+  Serial.print("SD Card Type: ");
+  if (cardType == CARD_MMC) {
+    Serial.println("MMC");
+  } else if (cardType == CARD_SD) {
+    Serial.println("SDSC");
+  } else if (cardType == CARD_SDHC) {
+    Serial.println("SDHC");
+  } else {
+    Serial.println("UNKNOWN");
+  }
+
+  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+  Serial.printf("SD Card Size: %lluMB\n", cardSize);
 #endif
 
   testText();
