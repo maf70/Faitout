@@ -1,6 +1,32 @@
 
+#include "config.h"
+
+#ifdef CFG_WIFI_AP
+#include <WiFi.h>
+#include <WebServer.h>
+#endif
+
 #include "tft_setup.h"
 #include <TFT_eSPI.h>
+
+// shared with web serveur for test purpose
+uint16_t x, y;
+uint32_t t;
+
+#ifdef CFG_WIFI_AP
+const char* ssid = "FAITOUT-AP";
+const char* password = "12345678";
+
+WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
+
+void handleRoot() {
+  char buffer[128];
+
+  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: 0.1 - 23-Feb-2025<br>uptime: %ld<br>x=%d y=%d</p>", t, x, y);
+  //Serial.println(buffer);
+  server.send(200, "text/html", buffer);
+}
+#endif
 
 TFT_eSPI tft = TFT_eSPI();
 uint16_t cal[5] = {441, 3477, 244, 3583, 5};
@@ -36,12 +62,26 @@ void setup(void)
   calibrate_touch();
   tft.setTouch(cal);
 
+#ifdef CFG_WIFI_AP
+  // Configurer l’ESP32 en mode AP (Point d’accès)
+  WiFi.softAP(ssid, password);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: " );
+  Serial.println(IP);
+
+  // Routeur pour la racine (« / »)
+  server.on("/", handleRoot);
+
+  // Démarrer le serveur
+  server.begin();
+  Serial.println("HTTP server started");
+#endif
+
   testText();
 
 }
  
 void loop() {
-  uint16_t x, y;
   if (tft.getTouch(&x, &y)) {
     tft.fillCircle(x, y, 2, TFT_YELLOW);
 
@@ -53,5 +93,11 @@ void loop() {
     tft.print(" ");
     tft.print(y, DEC);
   }
+
+  t = millis()/1000;
+
+#ifdef CFG_WIFI_AP
+  server.handleClient(); // Gérer les clients du serveur web
+#endif
 
 }
