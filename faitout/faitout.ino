@@ -20,6 +20,9 @@
 uint16_t x, y;
 uint32_t t, t_event;
 
+char sd_status[32];
+char sd_size[32];
+
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
 const char* password = "12345678";
@@ -27,10 +30,10 @@ const char* password = "12345678";
 WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
 
 void handleRoot() {
-  char buffer[128];
+  char buffer[256];
 
-  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d</p>",\
-          FAITOUT_VERSION, t, x, y);
+  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s,%s</p>",\
+          FAITOUT_VERSION, t, x, y, sd_status, sd_size);
   //Serial.println(buffer);
   server.send(200, "text/html", buffer);
 }
@@ -101,28 +104,35 @@ void setup(void)
 #ifdef CFG_SD_CARD
   if (!SD.begin(5, tft.getSPIinstance())) {
     Serial.println("Card Mount Failed");
+    sprintf(sd_status, "Card Mount Failed<br>");
     return;
   }
   uint8_t cardType = SD.cardType();
 
   if (cardType == CARD_NONE) {
     Serial.println("No SD card attached");
+    sprintf(sd_status, "No SD card attached <br>");
     return;
   }
 
   Serial.print("SD Card Type: ");
   if (cardType == CARD_MMC) {
     Serial.println("MMC");
+    sprintf(sd_status, "SD Card Type: MMC<br>");
   } else if (cardType == CARD_SD) {
     Serial.println("SDSC");
+    sprintf(sd_status, "SD Card Type: SDSC<br>");
   } else if (cardType == CARD_SDHC) {
     Serial.println("SDHC");
+    sprintf(sd_status, "SD Card Type: SDHC<br>");
   } else {
     Serial.println("UNKNOWN");
+    sprintf(sd_status, "SD Card Type: UNKNOWN<br>");
   }
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
   Serial.printf("SD Card Size: %lluMB\n", cardSize);
+  sprintf(sd_size, "SD Card Size: %lluMB<br>", cardSize);
 #endif
 
   testText();
