@@ -84,6 +84,7 @@ Missing original link of this image.
 |SD_MISO |D19  |Jaune              |
 |SD_CLK  |D18  |Violet             |
 
+DS18b20 => D32
 
 
 

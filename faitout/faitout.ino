@@ -15,6 +15,12 @@
 #include "tft_setup.h"
 #include <TFT_eSPI.h>
 
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+
+OneWire oneWire(DS18B20_PIN);
+DallasTemperature DS18B20(&oneWire);
 
 // shared with web serveur for test purpose
 uint16_t x, y;
@@ -22,6 +28,8 @@ uint32_t t, t_event;
 
 char sd_status[32];
 char sd_size[32];
+
+float temperature = 0;
 
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
@@ -32,8 +40,8 @@ WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
 void handleRoot() {
   char buffer[256];
 
-  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s,%s</p>",\
-          FAITOUT_VERSION, t, x, y, sd_status, sd_size);
+  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s%sTemperature = %f</p>",\
+          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature);
   //Serial.println(buffer);
   server.send(200, "text/html", buffer);
 }
@@ -135,6 +143,8 @@ void setup(void)
   sprintf(sd_size, "SD Card Size: %lluMB<br>", cardSize);
 #endif
 
+  DS18B20.begin();    // initialize the DS18B20 sensor
+
   testText();
 
 }
@@ -163,5 +173,11 @@ void loop() {
 #ifdef CFG_WIFI_AP
   server.handleClient(); // Gérer les clients du serveur web
 #endif
+  Serial.printf("%d ", millis());
+  DS18B20.requestTemperatures();                  // send the command to get temperatures
+  Serial.printf("%d ", millis());
+  temperature = DS18B20.getTempCByIndex(0); // read temperature in Celsius
+  Serial.printf("Temperature = %f ", temperature);
+  Serial.printf("%d\n", millis());
 
 }
