@@ -144,10 +144,13 @@ void setup(void)
 #endif
 
   DS18B20.begin();    // initialize the DS18B20 sensor
+  DS18B20.setWaitForConversion(false);
 
   testText();
 
 }
+
+bool T_requested = false;
  
 void loop() {
   if (tft.getTouch(&x, &y)) {
@@ -173,11 +176,18 @@ void loop() {
 #ifdef CFG_WIFI_AP
   server.handleClient(); // Gérer les clients du serveur web
 #endif
-  Serial.printf("%d ", millis());
-  DS18B20.requestTemperatures();                  // send the command to get temperatures
-  Serial.printf("%d ", millis());
-  temperature = DS18B20.getTempCByIndex(0); // read temperature in Celsius
-  Serial.printf("Temperature = %f ", temperature);
-  Serial.printf("%d\n", millis());
 
+  if ( ! T_requested ) {
+    DS18B20.requestTemperatures();                  // send the command to get temperatures
+    T_requested = true;
+  }
+  else
+  {
+    if (DS18B20.isConversionComplete() ) {
+      temperature = DS18B20.getTempCByIndex(0); // read temperature in Celsius
+      T_requested = false;
+    }
+  }
+
+  delay(50);
 }
