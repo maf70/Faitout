@@ -29,7 +29,9 @@ uint32_t t, t_event;
 char sd_status[32];
 char sd_size[32];
 
-float temperature = 0;
+float temperature_0 = 0;
+float temperature_1 = 0;
+uint8_t probe_nb = 0;
 
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
@@ -40,15 +42,18 @@ WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
 void handleRoot() {
   char buffer[256];
 
-  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s%sTemperature = %f</p>",\
-          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature);
+  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s<br>%s<br>Temperature 0 = %3.3f<br>Temperature 1 = %3.3f</p>",\
+          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature_0, temperature_1);
   //Serial.println(buffer);
   server.send(200, "text/html", buffer);
 }
 #endif
 
 TFT_eSPI tft = TFT_eSPI();
-uint16_t cal[5] = {441, 3477, 244, 3583, 5};
+// Ecran 2019
+// uint16_t cal[5] = {441, 3477, 244, 3583, 5};
+// Ecran 2025
+uint16_t cal[5] = {268, 3632, 360, 3433, 2};
 
 void calibrate_touch() {
   if (!cal[1]) {
@@ -112,35 +117,35 @@ void setup(void)
 #ifdef CFG_SD_CARD
   if (!SD.begin(5, tft.getSPIinstance())) {
     Serial.println("Card Mount Failed");
-    sprintf(sd_status, "Card Mount Failed<br>");
+    sprintf(sd_status, "Card Mount Failed");
     return;
   }
   uint8_t cardType = SD.cardType();
 
   if (cardType == CARD_NONE) {
     Serial.println("No SD card attached");
-    sprintf(sd_status, "No SD card attached <br>");
+    sprintf(sd_status, "No SD card attached");
     return;
   }
 
   Serial.print("SD Card Type: ");
   if (cardType == CARD_MMC) {
     Serial.println("MMC");
-    sprintf(sd_status, "SD Card Type: MMC<br>");
+    sprintf(sd_status, "SD Card Type: MMC");
   } else if (cardType == CARD_SD) {
     Serial.println("SDSC");
-    sprintf(sd_status, "SD Card Type: SDSC<br>");
+    sprintf(sd_status, "SD Card Type: SDSC");
   } else if (cardType == CARD_SDHC) {
     Serial.println("SDHC");
-    sprintf(sd_status, "SD Card Type: SDHC<br>");
+    sprintf(sd_status, "SD Card Type: SDHC");
   } else {
     Serial.println("UNKNOWN");
-    sprintf(sd_status, "SD Card Type: UNKNOWN<br>");
+    sprintf(sd_status, "SD Card Type: UNKNOWN");
   }
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
   Serial.printf("SD Card Size: %lluMB\n", cardSize);
-  sprintf(sd_size, "SD Card Size: %lluMB<br>", cardSize);
+  sprintf(sd_size, "SD Card Size: %lluMB", cardSize);
 #endif
 
   DS18B20.begin();    // initialize the DS18B20 sensor
@@ -154,6 +159,8 @@ bool T_requested = false;
  
 void loop() {
   if (tft.getTouch(&x, &y)) {
+    char tempText[7];
+
     t_event = millis()/1000;
 
     tft.fillCircle(x, y, 2, TFT_YELLOW);
@@ -167,6 +174,22 @@ void loop() {
     tft.print(x, DEC);
     tft.print(" ");
     tft.print(y, DEC);
+
+    if (temperature_0 != 0) {
+      tft.fillRect(110, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+      tft.setCursor(110, 140);
+      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+      sprintf(tempText, "%3.2f",temperature_0);
+      tft.print(tempText);
+    }
+
+    if (temperature_1 != 0) {
+      tft.fillRect(110, 170, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+      tft.setCursor(110, 170);
+      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+      sprintf(tempText, "%3.2f",temperature_1);
+      tft.print(tempText);
+    }
   }
 
   t = millis()/1000;
@@ -178,13 +201,15 @@ void loop() {
 #endif
 
   if ( ! T_requested ) {
+    probe_nb = DS18B20.getDeviceCount();
     DS18B20.requestTemperatures();                  // send the command to get temperatures
     T_requested = true;
   }
   else
   {
     if (DS18B20.isConversionComplete() ) {
-      temperature = DS18B20.getTempCByIndex(0); // read temperature in Celsius
+      if (probe_nb > 0 ) temperature_0 = DS18B20.getTempCByIndex(0); // read temperature in Celsius
+      if (probe_nb > 1 ) temperature_1 = DS18B20.getTempCByIndex(1); // read temperature in Celsius
       T_requested = false;
     }
   }

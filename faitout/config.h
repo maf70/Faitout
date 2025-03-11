@@ -1,5 +1,5 @@
 
-#define FAITOUT_VERSION "0.1.3 20250224"
+#define FAITOUT_VERSION "0.1.4 20250311"
 
 #define CFG_WIFI_AP
 #define CFG_SD_CARD
