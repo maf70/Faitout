@@ -18,9 +18,12 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include "max6675.h"
 
 OneWire oneWire(DS18B20_PIN);
 DallasTemperature DS18B20(&oneWire);
+
+MAX6675 thermocouple(MAX6675_SCLK, MAX6675_CS, MAX6675_MISO);
 
 // shared with web serveur for test purpose
 uint16_t x, y;
@@ -31,6 +34,7 @@ char sd_size[32];
 
 float temperature_0 = 0;
 float temperature_1 = 0;
+float temperature_k = 0;
 uint8_t probe_nb = 0;
 
 #ifdef CFG_WIFI_AP
@@ -42,8 +46,9 @@ WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
 void handleRoot() {
   char buffer[256];
 
-  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s<br>%s<br>Temperature 0 = %3.3f<br>Temperature 1 = %3.3f</p>",\
-          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature_0, temperature_1);
+  sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s<br>%s<br>\
+          Temperature 0 = %3.3f<br>Temperature 1 = %3.3f<br>Sonde K = %4.2f</p>",\
+          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature_0, temperature_1, temperature_k);
   //Serial.println(buffer);
   server.send(200, "text/html", buffer);
 }
@@ -190,6 +195,11 @@ void loop() {
       sprintf(tempText, "%3.2f",temperature_1);
       tft.print(tempText);
     }
+      tft.fillRect(110, 200, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+      tft.setCursor(110, 200);
+      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+      sprintf(tempText, "%3.2f",temperature_k);
+      tft.print(tempText);
   }
 
   t = millis()/1000;
@@ -211,8 +221,11 @@ void loop() {
       if (probe_nb > 0 ) temperature_0 = DS18B20.getTempCByIndex(0); // read temperature in Celsius
       if (probe_nb > 1 ) temperature_1 = DS18B20.getTempCByIndex(1); // read temperature in Celsius
       T_requested = false;
+
+      temperature_k = thermocouple.readCelsius();
     }
   }
 
   delay(50);
+
 }

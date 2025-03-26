@@ -63,7 +63,7 @@ Missing original link of this image.
 
 ## Wiring
 
-
+### TFTP + Touch + SD
 |ILI93941|ESP32|Comment            |
 |3.3     |3.3  |Rouge              |
 |GND     |GND  |Noir               |
@@ -80,11 +80,22 @@ Missing original link of this image.
 |T_DO    |D19  |Bleu               |
 |T_IRQ   | -   |Not connected      |
 |SD_CS   |D5   |Blanc              | must be used for SD according to sample ESP32_SDcard_jpeg
-|SD_MOSI |D13  |Vert clair         |
+|SD_MOSI |D23  |Vert clair         |
 |SD_MISO |D19  |Jaune              |
 |SD_CLK  |D18  |Violet             |
 
+### DS18B20
+
 DS18b20 => D32
 
+### MAX66775
+It does not work on the same SPI bus than previous devices.
+(SPI mode is not the same)
+|MAX6675|ESP32 |Comment            |
+|SCK    |D2    |Jaune              |
+|CS     |D13   |Vert               |
+|DO     |D12   |Rouge              |
+
+To do : try to change SPI setting before MAX6675 access, then set original setting after read.
 
 
