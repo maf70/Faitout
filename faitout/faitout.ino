@@ -41,6 +41,11 @@ long optic_counter = 0;
 long b1_counter = 0;
 long b2_counter = 0;
 
+int relay1 = 0;
+int relay2 = 0;
+int relay3 = 0;
+int relay4 = 0;
+
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
 const char* password = "12345678";
@@ -76,7 +81,11 @@ void calibrate_touch() {
 unsigned long testText() {
   tft.setRotation(3);
   tft.fillScreen(ILI9341_BLACK);
-  tft.setCursor(0, 0);
+  tft.fillRect(0, 0, 80, 30, ILI9341_RED);
+  tft.fillRect(80, 0, 80, 30, ILI9341_ORANGE);
+  tft.fillRect(160, 0, 80, 30, ILI9341_BLUE);
+  tft.fillRect(240, 0, 80, 30, ILI9341_GREEN);
+  tft.setCursor(0, 35);
   tft.setTextColor(ILI9341_GREEN);  tft.setTextSize(4);
   tft.println("   Faitout");
   tft.setTextColor(ILI9341_BLUE);  tft.setTextSize(3);
@@ -186,6 +195,15 @@ void setup(void)
   attachInterrupt(INPUT_PIN_3, Ext_IntB1_ISR, FALLING);
   pinMode(INPUT_PIN_4, INPUT);
   attachInterrupt(INPUT_PIN_4, Ext_IntB2_ISR, FALLING);
+
+  pinMode(OUTPUT_PIN_1, OUTPUT);
+  digitalWrite(OUTPUT_PIN_1, HIGH);
+  pinMode(OUTPUT_PIN_2, OUTPUT);
+  digitalWrite(OUTPUT_PIN_2, HIGH);
+  pinMode(OUTPUT_PIN_3, OUTPUT);
+  digitalWrite(OUTPUT_PIN_3, HIGH);
+  pinMode(OUTPUT_PIN_4, OUTPUT);
+  digitalWrite(OUTPUT_PIN_4, HIGH);
 }
 
 bool T_requested = false;
@@ -203,7 +221,7 @@ void loop() {
 #define TXT_SIZE 3
     tft.fillRect(110, 110, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
     tft.setCursor(110, 110);
-    tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+    tft.setTextColor(ILI9341_RED, TFT_BLACK);    tft.setTextSize(TXT_SIZE);
     tft.print(x, DEC);
     tft.print(" ");
     tft.print(y, DEC);
@@ -211,7 +229,7 @@ void loop() {
     if (temperature_0 != 0) {
       tft.fillRect(10, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
       tft.setCursor(10, 140);
-      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+      tft.setTextColor(ILI9341_RED, TFT_BLACK);    tft.setTextSize(TXT_SIZE);
       sprintf(tempText, "%3.2f",temperature_0);
       tft.print(tempText);
     }
@@ -219,14 +237,14 @@ void loop() {
     if (temperature_1 != 0) {
       tft.fillRect(140, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
       tft.setCursor(140, 140);
-      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+      tft.setTextColor(ILI9341_RED, TFT_BLACK);    tft.setTextSize(TXT_SIZE);
       sprintf(tempText, "%3.2f",temperature_1);
       tft.print(tempText);
     }
 
     tft.fillRect(10, 170, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
     tft.setCursor(10, 170);
-    tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+    tft.setTextColor(ILI9341_RED, TFT_BLACK);    tft.setTextSize(TXT_SIZE);
     sprintf(tempText, "%3.2f",temperature_k);
     tft.print(tempText);
 
@@ -237,6 +255,25 @@ void loop() {
     tft.print(b1_counter, DEC);
     tft.print(" ");
     tft.print(b2_counter, DEC);
+
+    if ( y < 30) {
+      if (x < 80) {
+        digitalWrite(OUTPUT_PIN_1, LOW);
+        relay1=60;
+      }
+      else if (x < 160) {
+        digitalWrite(OUTPUT_PIN_2, LOW);
+        relay2=60;
+      }
+      else if (x < 240) {
+        digitalWrite(OUTPUT_PIN_3, LOW);
+        relay3=60;
+      }
+      else {
+        digitalWrite(OUTPUT_PIN_4, LOW);
+        relay4=60;
+      }
+    }
   }
 
   t = millis()/1000;
@@ -261,6 +298,19 @@ void loop() {
 
       temperature_k = thermocouple.readCelsius();
     }
+  }
+
+  if (relay1 > 0) {
+    if (--relay1 == 0 ) digitalWrite(OUTPUT_PIN_1, HIGH);
+  }
+  if (relay2 > 0) {
+    if (--relay2 == 0 ) digitalWrite(OUTPUT_PIN_2, HIGH);
+  }
+  if (relay3 > 0) {
+    if (--relay3 == 0 ) digitalWrite(OUTPUT_PIN_3, HIGH);
+  }
+  if (relay4 > 0) {
+    if (--relay4 == 0 ) digitalWrite(OUTPUT_PIN_4, HIGH);
   }
 
   delay(50);

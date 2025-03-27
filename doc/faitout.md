@@ -105,5 +105,10 @@ To do : try to change SPI setting before MAX6675 access, then set original setti
 |Empty    |D34   |         |
 |Optical  |D35   |         |
 
-
+### Outputs
+|Output   |ESP32 | Comment |
+|Relay 4  |D25   |         |
+|Relay 3  |D26   |         |
+|Relay 2  |D27   |         |
+|Relay 1  |D14   |         |
 

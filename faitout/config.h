@@ -1,5 +1,5 @@
 
-#define FAITOUT_VERSION "0.1.6 20250326"
+#define FAITOUT_VERSION "0.1.7 20250327"
 
 #define CFG_WIFI_AP
 #define CFG_SD_CARD
@@ -18,3 +18,9 @@
 #define INPUT_PIN_2 34
 #define INPUT_PIN_3 39
 #define INPUT_PIN_4 36
+
+
+#define OUTPUT_PIN_1 14
+#define OUTPUT_PIN_2 27
+#define OUTPUT_PIN_3 26
+#define OUTPUT_PIN_4 25
