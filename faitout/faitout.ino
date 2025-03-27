@@ -37,6 +37,10 @@ float temperature_1 = 0;
 float temperature_k = 0;
 uint8_t probe_nb = 0;
 
+long optic_counter = 0;
+long b1_counter = 0;
+long b2_counter = 0;
+
 #ifdef CFG_WIFI_AP
 const char* ssid = "FAITOUT-AP";
 const char* password = "12345678";
@@ -44,11 +48,11 @@ const char* password = "12345678";
 WebServer server(80); // Port 80 est le port par défaut pour le web HTTP
 
 void handleRoot() {
-  char buffer[256];
+  char buffer[512];
 
   sprintf(buffer, "<h1>Faitout test page</h1><p>Version: %s<br>uptime: %ld<br>x=%d y=%d<br>%s<br>%s<br>\
-          Temperature 0 = %3.3f<br>Temperature 1 = %3.3f<br>Sonde K = %4.2f</p>",\
-          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature_0, temperature_1, temperature_k);
+          Temperature 0 = %3.3f<br>Temperature 1 = %3.3f<br>Sonde K = %4.2f<br>Capteur Optique = %d<br>Bouton 1 = %d<br>Bouton 2 = %d</p>",\
+          FAITOUT_VERSION, t, x, y, sd_status, sd_size, temperature_0, temperature_1, temperature_k, optic_counter, b1_counter, b2_counter);
   //Serial.println(buffer);
   server.send(200, "text/html", buffer);
 }
@@ -81,6 +85,24 @@ unsigned long testText() {
   tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
   tft.println(micros()/1000, DEC);
   return 0;
+}
+
+void IRAM_ATTR Ext_IntO_ISR()
+{
+  // Increment counter
+  optic_counter++;
+}
+
+void IRAM_ATTR Ext_IntB1_ISR()
+{
+  // Increment counter
+  b1_counter++;
+}
+
+void IRAM_ATTR Ext_IntB2_ISR()
+{
+  // Increment counter
+  b2_counter++;
 }
 
 void setup(void)
@@ -158,6 +180,12 @@ void setup(void)
 
   testText();
 
+  pinMode(INPUT_PIN_1, INPUT);
+  attachInterrupt(INPUT_PIN_1, Ext_IntO_ISR, FALLING);
+  pinMode(INPUT_PIN_3, INPUT);
+  attachInterrupt(INPUT_PIN_3, Ext_IntB1_ISR, FALLING);
+  pinMode(INPUT_PIN_4, INPUT);
+  attachInterrupt(INPUT_PIN_4, Ext_IntB2_ISR, FALLING);
 }
 
 bool T_requested = false;
@@ -181,30 +209,39 @@ void loop() {
     tft.print(y, DEC);
 
     if (temperature_0 != 0) {
-      tft.fillRect(110, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
-      tft.setCursor(110, 140);
+      tft.fillRect(10, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+      tft.setCursor(10, 140);
       tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
       sprintf(tempText, "%3.2f",temperature_0);
       tft.print(tempText);
     }
 
     if (temperature_1 != 0) {
-      tft.fillRect(110, 170, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
-      tft.setCursor(110, 170);
+      tft.fillRect(140, 140, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+      tft.setCursor(140, 140);
       tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
       sprintf(tempText, "%3.2f",temperature_1);
       tft.print(tempText);
     }
-      tft.fillRect(110, 200, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
-      tft.setCursor(110, 200);
-      tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
-      sprintf(tempText, "%3.2f",temperature_k);
-      tft.print(tempText);
+
+    tft.fillRect(10, 170, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
+    tft.setCursor(10, 170);
+    tft.setTextColor(ILI9341_RED);    tft.setTextSize(TXT_SIZE);
+    sprintf(tempText, "%3.2f",temperature_k);
+    tft.print(tempText);
+
+    tft.fillRect(10, 200, TXT_SIZE*6*15 - TXT_SIZE, TXT_SIZE*15, TFT_BLACK);
+    tft.setCursor(10, 200);
+    tft.print(optic_counter, DEC);
+    tft.print(" ");
+    tft.print(b1_counter, DEC);
+    tft.print(" ");
+    tft.print(b2_counter, DEC);
   }
 
   t = millis()/1000;
 
-  if ( t - t_event > 10 ) digitalWrite(TFT_BL, LOW);
+  if ( t - t_event > 30 ) digitalWrite(TFT_BL, LOW);
 
 #ifdef CFG_WIFI_AP
   server.handleClient(); // Gérer les clients du serveur web

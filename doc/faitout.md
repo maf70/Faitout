@@ -98,4 +98,12 @@ It does not work on the same SPI bus than previous devices.
 
 To do : try to change SPI setting before MAX6675 access, then set original setting after read.
 
+### Physical button + optical counter
+|Input    |ESP32 | Comment |
+|Button 2 |D36   |         |
+|Button 1 |D39   |         |
+|Empty    |D34   |         |
+|Optical  |D35   |         |
+
+
 
