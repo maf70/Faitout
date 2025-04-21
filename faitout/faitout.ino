@@ -218,6 +218,10 @@ void loop() {
 
     digitalWrite(TFT_BL, HIGH);
 
+    Serial.print(x, DEC);
+    Serial.print(" ");
+    Serial.println(y, DEC);
+
 #define TXT_SIZE 3
     tft.fillRect(110, 110, TXT_SIZE*6*7 - TXT_SIZE, TXT_SIZE*7, TFT_BLACK);
     tft.setCursor(110, 110);
